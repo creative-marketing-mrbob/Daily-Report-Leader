@@ -1,0 +1,26 @@
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import fs from 'node:fs';
+const rows=[],categoryRows=[];
+function sheet(data,width){return {getLastRow:()=>data.length+1,getRange:(r,c,n,w)=>({getValues:()=>data.slice(r-2,r-2+n).map(row=>row.slice(c-1,c-1+w))}),appendRow:row=>data.push(row)};}
+const reports=sheet(rows,14),categories=sheet(categoryRows,2);
+let locked=false;
+const context=vm.createContext({PropertiesService:{getScriptProperties:()=>({getProperty:()=> 'test-secret'})},LockService:{getScriptLock:()=>({tryLock:()=>{locked=true;return true;},hasLock:()=>locked,releaseLock:()=>{locked=false;}})},SpreadsheetApp:{openById:()=>({getSheetByName:n=>n==='Report Website'?reports:categories}),flush:()=>{}},ContentService:{createTextOutput:body=>({setMimeType:()=>body}),MimeType:{JSON:'json'}}});
+vm.runInContext(fs.readFileSync('integrations/google-sheets/Code.gs','utf8'),context);
+const call=data=>JSON.parse(context.doPost({postData:{contents:JSON.stringify({secret:'test-secret',...data})}}));
+const blank={hasProblem:false,problem:'',solution:'',status:'Belum solved'};
+const report={id:'a',date:'2026-09-07',division:'sosmed',problem:{...blank,hasProblem:true,problems:[{id:'p',problem:'Kendala',solution:'Solusi',status:'Belum solved'}]},members:['Dewi','Cindy','Zakki','Sulton','Mario'].map(name=>({...blank,name,metric:name==='Dewi'?'123':'',tasks:[{id:name,pekerjaan:'=IMPORTXML("bad")',kategori:'Baru',progress:'100'}]}))};
+assert.equal(call({action:'list',secret:'wrong'}).ok,false);
+assert.equal(call({action:'save',report}).ok,true);
+assert.equal(rows.length,1);
+assert.equal(call({action:'save',report}).ok,true);assert.equal(rows.length,1);
+const revision={...report,id:'b'};
+assert.equal(call({action:'save',report:revision}).code,409);
+assert.equal(call({action:'save',report:revision,expectedId:'a'}).ok,true);
+assert.equal(call({action:'save',report:{...report,id:'c'},expectedId:'a'}).code,409);
+const read=call({action:'list'});assert.equal(read.reports.length,1);assert.equal(read.reports[0].id,'b');assert.equal(read.reports[0].members[0].metric,'123');assert.equal(read.reports[0].problem.problems.length,1);
+assert.equal(call({action:'category',member:'Cindy',category:'New'}).ok,true);call({action:'category',member:'Cindy',category:'new'});assert.equal(categoryRows.length,1);
+assert.equal(call({action:'save',report:{...report,date:'2026-02-31'}}).ok,false);
+assert.equal(call({action:'save',report:{...report,members:[]}}).ok,false);
+assert.equal(context.literal('=1+1'),"'=1+1");assert.equal(context.literal(123),123);
+console.log('PASS: shared reads, write/retry, revisions, conflicts, multiple problems, category deduplication, validation, formula escaping');
