@@ -1,14 +1,11 @@
-import {timingSafeEqual} from 'node:crypto';
 import {validateReport} from '../../reportData';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 const json=(data:unknown,status=200)=>Response.json(data,{status,headers:{'Cache-Control':'no-store'}});
 export async function POST(request:Request){
- const url=process.env.GOOGLE_SHEETS_WEB_APP_URL,secret=process.env.GOOGLE_SHEETS_SECRET,access=process.env.REPORT_ACCESS_CODE;
- if(!url||!secret||!access)return json({error:'Sinkronisasi belum diaktifkan. Lengkapi koneksi Google Sheets di server.'},503);
- const provided=request.headers.get('x-report-access')||'';
- if(Buffer.byteLength(provided)!==Buffer.byteLength(access)||!timingSafeEqual(Buffer.from(provided),Buffer.from(access)))return json({error:'Kode akses tim tidak sesuai.'},401);
+ const url=process.env.GOOGLE_SHEETS_WEB_APP_URL,secret=process.env.GOOGLE_SHEETS_SECRET;
+ if(!url||!secret)return json({error:'Sinkronisasi belum diaktifkan. Lengkapi koneksi Google Sheets di server.'},503);
  try{
  const raw=await request.text();if(raw.length>45000)return json({error:'Report terlalu panjang. Kurangi isi report.'},413);
  const body=JSON.parse(raw);
