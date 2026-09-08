@@ -1,6 +1,7 @@
+import {inPeriod} from './periods';
 import type {SavedReport} from './reportData';
 // Monthly targets retained from MARKETING AI INTELEGENCE/src/data/initialData.ts.
-export const monthlyTargets = [
+export const periodTargets = [
   {
     "name": "Dewi",
     "title": "Total pertumbuhan followers",
@@ -148,12 +149,12 @@ const aliases:Record<string,string[]>={
  'Total konten grafis':['Desain grafis']
 };
 const normalize=(s:string)=>s.trim().toLowerCase();
-export function targetResults(name:string,reports:SavedReport[],month:string){
- const monthly=reports.filter(r=>r.date.startsWith(month));
- return monthlyTargets.filter(t=>t.name===name).map(t=>{
+export function targetResults(name:string,reports:SavedReport[],period:number){
+ const periodReports=reports.filter(r=>inPeriod(r.date,period));
+ return periodTargets.filter(t=>t.name===name).map(t=>{
  const sourceName=(t.title==='Jumlah ide kreatif team (campaign)'&&name==='Cindy')||(t.title==='Total pertumbuhan followers'&&name==='Mario')?'Dewi':name;
- const entries=monthly.flatMap(r=>r.members.filter(m=>m.name===sourceName).map(m=>({...m,date:r.date}))).sort((a,b)=>b.date.localeCompare(a.date));
- // Each metric is a cumulative result for the selected 28-workday reporting period.
+ const entries=periodReports.flatMap(r=>r.members.filter(m=>m.name===sourceName).map(m=>({...m,date:r.date}))).sort((a,b)=>b.date.localeCompare(a.date));
+ // Each metric is a cumulative result for the selected 28-day reporting period.
  if(['Total pertumbuhan followers','Total penambahan likes TikTok','Total lead yang dihasilkan'].includes(t.title)){
  const latest=entries.find(m=>m.metric!==''&&m.metric!==undefined&&Number.isFinite(Number(m.metric)));
  const actual=latest?Number(latest.metric):null;
