@@ -1,0 +1,12 @@
+import assert from 'node:assert/strict';
+import {achievement,targetResults} from '../app/targets.ts';
+assert.equal(achievement(8,10),80);
+assert.equal(achievement(12,10),120);
+assert.equal(achievement(0,0),null);
+const report={date:'2026-09-08',members:[{name:'Cindy',tasks:[{kategori:'Naskah Instagram',progress:'100'},{kategori:'Naskah Instagram',progress:'50'},{kategori:'Request',progress:'100'}]}]};
+let results=targetResults('Cindy',[report],'2026-09');
+assert.equal(results.find(t=>t.title==='Total naskah konten Instagram grafis').target,22);
+assert.equal(results.find(t=>t.title==='Total naskah konten Instagram grafis').actual,1);
+assert.equal(targetResults('Cindy',[report],'2026-08')[0].actual,0);
+assert.equal(targetResults('Mario',[],'2026-09')[0].score,null);
+console.log('PASS: 80% example, zero target, category mapping, done only, month isolation, missing metric');
