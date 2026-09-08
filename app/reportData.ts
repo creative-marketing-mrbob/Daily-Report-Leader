@@ -26,7 +26,7 @@ export function getToday(){const d=new Date();return `${d.getFullYear()}-${Strin
 export function validateReport(r:SavedReport){
  if(!r.date || !r.members.length) return 'Lengkapi tanggal dan anggota.';
  for(const m of r.members){
- if(['Dewi','Ilham'].includes(m.name) && (!/^\d+$/.test(m.metric)||!Number.isSafeInteger(Number(m.metric)))) return `Jumlah ${m.name==='Dewi'?'followers':'lead'} wajib diisi angka bulat, minimal 0.`;
+ if(['Dewi','Ilham','Mario'].includes(m.name) && (!/^\d+$/.test(m.metric)||!Number.isSafeInteger(Number(m.metric)))) return `Jumlah ${m.name==='Dewi'?'followers':m.name==='Mario'?'likes TikTok':'lead'} wajib diisi angka bulat, minimal 0.`;
  for(const t of m.tasks){if(!t.pekerjaan.trim()||!t.kategori.trim()||t.progress===''||!Number.isFinite(Number(t.progress))||Number(t.progress)<0||Number(t.progress)>100) return `Lengkapi pekerjaan, kategori, dan progress 0–100% untuk ${m.name}.`;}
  }
  for(const p of [r.problem,...r.members].flatMap(getProblems)) if(!p.problem.trim()||!p.solution.trim()) return 'Lengkapi problem dan solusi.';

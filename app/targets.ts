@@ -151,13 +151,24 @@ const normalize=(s:string)=>s.trim().toLowerCase();
 export function targetResults(name:string,reports:SavedReport[],month:string){
  const monthly=reports.filter(r=>r.date.startsWith(month));
  return monthlyTargets.filter(t=>t.name===name).map(t=>{
- const sourceName=t.title==='Jumlah ide kreatif team (campaign)'&&name==='Cindy'?'Dewi':name;
- const entries=monthly.flatMap(r=>r.members.filter(m=>m.name===sourceName));
- // The existing form has no likes or explicit follower-growth field.
- if(t.title==='Total pertumbuhan followers'||t.title==='Total penambahan likes TikTok'||t.title==='Total lead yang dihasilkan')return {...t,actual:null,score:null};
+ const sourceName=(t.title==='Jumlah ide kreatif team (campaign)'&&name==='Cindy')||(t.title==='Total pertumbuhan followers'&&name==='Mario')?'Dewi':name;
+ const entries=monthly.flatMap(r=>r.members.filter(m=>m.name===sourceName).map(m=>({...m,date:r.date}))).sort((a,b)=>b.date.localeCompare(a.date));
+ // Each metric is a cumulative result for the selected 28-workday reporting period.
+ if(['Total pertumbuhan followers','Total penambahan likes TikTok','Total lead yang dihasilkan'].includes(t.title)){
+ const latest=entries.find(m=>m.metric!==''&&m.metric!==undefined&&Number.isFinite(Number(m.metric)));
+ const actual=latest?Number(latest.metric):null;
+ return {...t,actual,score:actual===null?null:actual/t.target*100};
+ }
  const names=[t.title,...(aliases[t.title]||[])].map(normalize);
  const actual=entries.flatMap(m=>m.tasks).filter(task=>Number(task.progress)===100&&names.includes(normalize(task.kategori))).length;
  return {...t,actual,score:actual/t.target*100};
  });
 }
 export function achievement(actual:number,target:number){return target>0?actual/target*100:null;}
+
+export function overallScore(results:{target:number;actual:number|null;score:number|null;title:string}[]){
+ if(!results.length||results.some(r=>r.actual===null))return null;
+ const mixed=results.some(r=>['Total pertumbuhan followers','Total penambahan likes TikTok','Total lead yang dihasilkan'].includes(r.title));
+ // Normalize unlike units (followers, likes, leads, activities) before combining.
+ return Math.round(mixed?results.reduce((sum,r)=>sum+(r.score||0),0)/results.length:results.reduce((sum,r)=>sum+(r.actual||0),0)/results.reduce((sum,r)=>sum+r.target,0)*100);
+}

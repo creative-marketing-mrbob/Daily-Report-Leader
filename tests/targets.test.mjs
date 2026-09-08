@@ -10,3 +10,12 @@ assert.equal(results.find(t=>t.title==='Total naskah konten Instagram grafis').a
 assert.equal(targetResults('Cindy',[report],'2026-08')[0].actual,0);
 assert.equal(targetResults('Mario',[],'2026-09')[0].score,null);
 console.log('PASS: 80% example, zero target, category mapping, done only, month isolation, missing metric');
+const metrics=[{date:'2026-09-02',members:[{name:'Dewi',metric:'100',tasks:[]},{name:'Mario',metric:'1000',tasks:[]},{name:'Ilham',metric:'10',tasks:[]}]},{date:'2026-09-08',members:[{name:'Dewi',metric:'1600',tasks:[]},{name:'Mario',metric:'80000',tasks:[]},{name:'Ilham',metric:'160',tasks:[]}]}];
+assert.equal(targetResults('Dewi',metrics,'2026-09')[0].actual,1600);
+assert.equal(targetResults('Dewi',metrics,'2026-09')[0].score,80);
+assert.equal(targetResults('Mario',metrics,'2026-09')[0].actual,1600);
+assert.equal(targetResults('Mario',metrics,'2026-09')[1].score,80);
+assert.equal(targetResults('Ilham',metrics,'2026-09').find(t=>t.title==='Total lead yang dihasilkan').score,80);
+const {overallScore}=await import('../app/targets.ts');
+assert.equal(overallScore(targetResults('Mario',metrics,'2026-09')),80);
+console.log('PASS: latest cumulative metrics, shared followers, likes, leads, normalized mixed-unit score');
