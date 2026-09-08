@@ -1,8 +1,8 @@
 export const FIRST_PERIOD_START='2026-09-15';
 const DAY=86400000;
-export function periodIndex(date:string){return Math.max(0,Math.floor((Date.parse(date+'T00:00:00Z')-Date.parse(FIRST_PERIOD_START+'T00:00:00Z'))/(28*DAY)));}
+export function periodIndex(date:string){return Math.max(-1,Math.floor((Date.parse(date+'T00:00:00Z')-Date.parse(FIRST_PERIOD_START+'T00:00:00Z'))/(28*DAY)));}
 export function getPeriod(index:number){
- const startTime=Date.parse(FIRST_PERIOD_START+'T00:00:00Z')+Math.max(0,index)*28*DAY;
+ const startTime=Date.parse(FIRST_PERIOD_START+'T00:00:00Z')+Math.max(-1,index)*28*DAY;
  return {index,start:new Date(startTime).toISOString().slice(0,10),end:new Date(startTime+27*DAY).toISOString().slice(0,10)};
 }
 export function inPeriod(date:string,index:number){const p=getPeriod(index);return date>=p.start&&date<=p.end;}
