@@ -1,4 +1,5 @@
-import {inPeriod} from './periods';
+import {inPeriod,getPeriod} from './periods';
+import {taskHistory} from './taskHistory';
 import type {SavedReport} from './reportData';
 // Monthly targets retained from MARKETING AI INTELEGENCE/src/data/initialData.ts.
 export const periodTargets = [
@@ -161,7 +162,7 @@ export function targetResults(name:string,reports:SavedReport[],period:number){
  return {...t,actual,score:actual===null?null:actual/t.target*100};
  }
  const names=[t.title,...(aliases[t.title]||[])].map(normalize);
- const actual=entries.flatMap(m=>m.tasks).filter(task=>Number(task.progress)===100&&names.includes(normalize(task.kategori))).length;
+ const actual=taskHistory(reports,getPeriod(period).end).filter(task=>task.member===sourceName&&Number(task.progress)===100&&task.completedOn!==null&&inPeriod(task.completedOn,period)&&names.includes(normalize(task.kategori))).length;
  return {...t,actual,score:actual/t.target*100};
  });
 }
