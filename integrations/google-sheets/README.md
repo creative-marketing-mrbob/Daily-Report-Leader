@@ -45,3 +45,7 @@ Tombol Pindahkan report lama mengirim data yang masih tersimpan di browser. Repo
 - Siapa pun yang memiliki link website bisa melihat dan mengirim report kedua divisi. Tidak ada login atau hak akses per orang.
 - Koneksi gagal tidak dianggap berhasil menyimpan; isian tetap berada di halaman. Jangan menutup atau memuat ulang halaman sebelum penyimpanan berhasil.
 - Sinkronisasi baru aktif setelah Apps Script dan variabel server selesai. Integrasi belum diuji ke Google secara langsung sebelum aktivasi tersebut.
+
+### Edit melalui dashboard
+
+Klik **Edit** pada baris aktivitas untuk mengubah aktivitas, kategori, atau progress, lalu **Simpan**. Website menyimpan versi report baru ke Google Sheets dan memakai versi terbaru untuk dashboard serta KPI. Baris lama tetap menjadi riwayat. Jika report berubah saat sedang diedit, muat ulang lalu edit kembali agar perubahan tim lain tidak tertimpa. Fitur ini memakai aksi `list` dan `save` yang sudah ada; tidak perlu mengganti Apps Script.
