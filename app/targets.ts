@@ -109,7 +109,7 @@ export const periodTargets = [
   },
   {
     "name": "Alin",
-    "title": "Total konten grafis",
+    "title": "Desain Request",
     "target": 30
   },
   {
@@ -146,7 +146,7 @@ const aliases:Record<string,string[]>={
  'Total thumbnail YouTube':['Thumbnail Youtube'], 'Total konten iklan':['Video Iklan'], 'Total konten YouTube':['Video Youtube'],
  'Jumlah ide kreatif team (campaign)':['Ide campaign'], 'Ide marketing baru':['Ide campaign'],
  'Jumlah konten dealdone':['Konten dealdone'], 'Winning content iklan':['Winning content iklan'], 'Jumlah campaign yang dieksekusi':['Campaign dieksekusi'],
- 'Total konten grafis':['Desain grafis']
+ 'Desain Request':['Desain Request']
 };
 const normalize=(s:string)=>s.trim().toLowerCase();
 export function targetResults(name:string,reports:SavedReport[],period:number){
