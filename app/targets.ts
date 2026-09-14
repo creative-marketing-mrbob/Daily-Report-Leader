@@ -159,13 +159,13 @@ export function metricGrowth(name:string,reports:SavedReport[],period:number):nu
  const baseline=current[0];
  return current[current.length-1].value-baseline.value;
 }
-export function dailyMetricGrowth(name:string,reports:SavedReport[],date:string){
+export function periodGrowthAtDate(name:string,reports:SavedReport[],date:string){
  const start=getPeriod(periodIndex(date)).start;
  const samples=reports.filter(r=>r.date>=start&&r.date<=date).flatMap(r=>r.members.filter(m=>m.name===name&&typeof m.metric==='string'&&/^\d+$/.test(m.metric)&&Number.isSafeInteger(Number(m.metric))).map(m=>({date:r.date,value:Number(m.metric)}))).sort((a,b)=>a.date.localeCompare(b.date));
  const current=samples.find(s=>s.date===date);
  if(!current)return null;
- const previous=samples.filter(s=>s.date<date).at(-1);
- return {actual:previous?current.value-previous.value:0,baseline:!previous,previousDate:previous?.date||null};
+ const first=samples[0];
+ return {actual:current.value-first.value,baseline:current.date===first.date,baselineDate:first.date};
 }
 export function targetResults(name:string,reports:SavedReport[],period:number){
  const periodReports=reports.filter(r=>inPeriod(r.date,period));

@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import {inPeriod,getPeriod} from './periods';
 import {taskHistory} from './taskHistory';
-import {targetResults,overallScore,dailyMetricGrowth} from './targets';
+import {targetResults,overallScore,periodGrowthAtDate} from './targets';
 import {categories,SavedReport,Task} from './reportData';
 
 const shortTitles:Record<string,string>={
@@ -20,9 +20,9 @@ export default function MemberReportPanels({names,reports,scoreReports,period,on
  })}</div>;
 }
 function DayRows({entry,scoreReports,onEdit,busy}:{scoreReports:SavedReport[];entry:SavedReport['members'][number]&{date:string;report:SavedReport};onEdit:EditHandler;busy:boolean}){
- const daily=['Dewi','Mario'].includes(entry.name)?dailyMetricGrowth(entry.name,scoreReports,entry.date):null;
+ const daily=['Dewi','Mario'].includes(entry.name)?periodGrowthAtDate(entry.name,scoreReports,entry.date):null;
  const dailyLabel=entry.name==='Dewi'?'Followers':'Likes TikTok';
- return <><tr className="activity-date"><th colSpan={3} scope="rowgroup">{new Date(entry.date+'T12:00:00').toLocaleDateString('id-ID',{dateStyle:'long'})}{daily&&<span className="daily-growth">{dailyLabel} {daily.actual>0?'+':''}{daily.actual.toLocaleString('id-ID')}{daily.baseline?' · Patokan awal':` · sejak ${new Date(daily.previousDate+'T12:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'})}`}</span>}</th></tr>{entry.tasks.length?entry.tasks.map(t=><EditableActivity key={t.id} task={t} member={entry.name} report={entry.report} onEdit={onEdit} busy={busy}/>):<tr><td colSpan={3} className="member-empty">Tidak ada aktivitas dilaporkan.</td></tr>}</>;
+ return <><tr className="activity-date"><th colSpan={3} scope="rowgroup">{new Date(entry.date+'T12:00:00').toLocaleDateString('id-ID',{dateStyle:'long'})}{daily&&<span className="daily-growth">{dailyLabel} {daily.actual>0?'+':''}{daily.actual.toLocaleString('id-ID')}{daily.baseline?' · Patokan awal':` · sejak ${new Date(daily.baselineDate+'T12:00:00').toLocaleDateString('id-ID',{day:'numeric',month:'short'})}`}</span>}</th></tr>{entry.tasks.length?entry.tasks.map(t=><EditableActivity key={t.id} task={t} member={entry.name} report={entry.report} onEdit={onEdit} busy={busy}/>):<tr><td colSpan={3} className="member-empty">Tidak ada aktivitas dilaporkan.</td></tr>}</>;
 }
 function EditableActivity({task,member,report,onEdit,busy}:{task:Task;member:string;report:SavedReport;onEdit:EditHandler;busy:boolean}){
  const [draft,setDraft]=useState<Task|null>(null),[original,setOriginal]=useState(report),[error,setError]=useState(''),[pending,setPending]=useState(false);

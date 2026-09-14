@@ -5,7 +5,7 @@ const encode=code=>'data:text/javascript;base64,'+Buffer.from(code).toString('ba
 const periodModule=encode(ts.transpile(fs.readFileSync('app/periods.ts','utf8'),{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}));
 const historyModule=encode(ts.transpile(fs.readFileSync('app/taskHistory.ts','utf8'),{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}));
 const targetModule=encode(ts.transpile(fs.readFileSync('app/targets.ts','utf8'),{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}).replace("'./periods'",JSON.stringify(periodModule)).replace("'./taskHistory'",JSON.stringify(historyModule)));
-const {achievement,targetResults,overallScore,dailyMetricGrowth}=await import(targetModule);
+const {achievement,targetResults,overallScore,periodGrowthAtDate}=await import(targetModule);
 const {getPeriod,inPeriod,periodIndex}=await import(periodModule);
 assert.equal(achievement(8,10),80);
 assert.equal(achievement(12,10),120);
@@ -107,9 +107,9 @@ assert.equal(targetResults('Mario',newPeriod.slice(0,2),0)[1].actual,0);
 console.log('PASS: each period resets followers and likes to zero against its own first report');
 
 const dailyReports=[totals('2026-09-15',2001),totals('2026-09-16',2101),totals('2026-09-17',2251),totals('2026-09-19',2251),totals('2026-09-20',2201),totals('2026-10-13',3000)];
-assert.deepEqual(['2026-09-15','2026-09-16','2026-09-17','2026-09-19','2026-09-20','2026-10-13'].map(date=>dailyMetricGrowth('Dewi',dailyReports,date).actual),[0,100,150,0,-50,0]);
-assert.equal(dailyMetricGrowth('Dewi',dailyReports,'2026-09-18'),null);
-assert.equal(dailyMetricGrowth('Dewi',dailyReports,'2026-09-19').previousDate,'2026-09-17');
-assert.equal(dailyMetricGrowth('Mario',dailyReports,'2026-09-17').actual,150);
+assert.deepEqual(['2026-09-15','2026-09-16','2026-09-17','2026-09-19','2026-09-20','2026-10-13'].map(date=>periodGrowthAtDate('Dewi',dailyReports,date).actual),[0,100,250,250,200,0]);
+assert.equal(periodGrowthAtDate('Dewi',dailyReports,'2026-09-18'),null);
+assert.equal(periodGrowthAtDate('Dewi',dailyReports,'2026-09-19').baselineDate,'2026-09-15');
+assert.equal(periodGrowthAtDate('Mario',dailyReports,'2026-09-17').actual,250);
 assert.equal(targetResults('Dewi',dailyReports,0)[0].actual,200);
-console.log('PASS: daily changes are independent of cumulative growth, date filters, missing days and next period');
+console.log('PASS: each report date shows cumulative growth from the period benchmark, including missing days and period reset');
