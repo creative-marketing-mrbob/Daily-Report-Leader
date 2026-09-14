@@ -150,13 +150,13 @@ const aliases:Record<string,string[]>={
  'Desain Request':['Desain Request']
 };
 const normalize=(s:string)=>s.trim().toLowerCase();
-// Account totals become net growth within each reporting period.
+// Each period starts at zero, using its first reported total as the baseline.
 export function metricGrowth(name:string,reports:SavedReport[],period:number):number|null{
  const {start,end}=getPeriod(period);
- const samples=reports.filter(r=>r.date<=end).flatMap(r=>r.members.filter(m=>m.name===name&&typeof m.metric==='string'&&/^\d+$/.test(m.metric)&&Number.isSafeInteger(Number(m.metric))).map(m=>({date:r.date,value:Number(m.metric)}))).sort((a,b)=>a.date.localeCompare(b.date));
+ const samples=reports.filter(r=>r.date>=start&&r.date<=end).flatMap(r=>r.members.filter(m=>m.name===name&&typeof m.metric==='string'&&/^\d+$/.test(m.metric)&&Number.isSafeInteger(Number(m.metric))).map(m=>({date:r.date,value:Number(m.metric)}))).sort((a,b)=>a.date.localeCompare(b.date));
  const current=samples.filter(s=>s.date>=start);
  if(!current.length)return null;
- const baseline=samples.filter(s=>s.date<start).at(-1)||current[0];
+ const baseline=current[0];
  return current[current.length-1].value-baseline.value;
 }
 export function targetResults(name:string,reports:SavedReport[],period:number){

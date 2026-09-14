@@ -88,12 +88,20 @@ const totals=(date,followers,likes=followers)=>({date,members:[{name:'Dewi',metr
 const growth=records=>targetResults('Dewi',records,0)[0].actual;
 assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22',2101)]),100);
 assert.equal(growth([totals('2026-09-21',2001)]),0);
-assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-15',2101)]),100);
+assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-15',2101)]),0);
 assert.equal(growth([totals('2026-09-14',2001)]),null);
-assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-17',2101),totals('2026-10-12',2301),totals('2026-10-13',2501)]),300);
-assert.equal(targetResults('Dewi',[totals('2026-10-12',2301),totals('2026-10-13',2501)],1)[0].actual,200);
+assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-17',2101),totals('2026-10-12',2301),totals('2026-10-13',2501)]),200);
+assert.equal(targetResults('Dewi',[totals('2026-10-12',2301),totals('2026-10-13',2501)],1)[0].actual,0);
 assert.equal(growth([totals('2026-09-22',2001),totals('2026-09-21',2101)]),-100);
 assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22',2001)]),0);
 assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22','')]),0);
 assert.equal(targetResults('Mario',[totals('2026-09-21',2001,500000),totals('2026-09-22',2101,510000)],0)[1].actual,10000);
 console.log('PASS: account total deltas, first baseline, period rollover, missing days, unchanged and falling totals, TikTok likes');
+
+const newPeriod=[totals('2026-09-14',1000,10000),totals('2026-09-15',2001,500000),totals('2026-09-16',2101,510000),totals('2026-10-13',3000,600000),totals('2026-10-14',3150,620000)];
+assert.equal(targetResults('Dewi',newPeriod,0)[0].actual,100);
+assert.equal(targetResults('Dewi',newPeriod,1)[0].actual,150);
+assert.equal(targetResults('Mario',newPeriod,0)[1].actual,10000);
+assert.equal(targetResults('Mario',newPeriod,1)[1].actual,20000);
+assert.equal(targetResults('Mario',newPeriod.slice(0,2),0)[1].actual,0);
+console.log('PASS: each period resets followers and likes to zero against its own first report');
