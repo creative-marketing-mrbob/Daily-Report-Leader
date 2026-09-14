@@ -150,13 +150,26 @@ const aliases:Record<string,string[]>={
  'Desain Request':['Desain Request']
 };
 const normalize=(s:string)=>s.trim().toLowerCase();
+// Account totals become net growth within each reporting period.
+export function metricGrowth(name:string,reports:SavedReport[],period:number):number|null{
+ const {start,end}=getPeriod(period);
+ const samples=reports.filter(r=>r.date<=end).flatMap(r=>r.members.filter(m=>m.name===name&&typeof m.metric==='string'&&/^\d+$/.test(m.metric)&&Number.isSafeInteger(Number(m.metric))).map(m=>({date:r.date,value:Number(m.metric)}))).sort((a,b)=>a.date.localeCompare(b.date));
+ const current=samples.filter(s=>s.date>=start);
+ if(!current.length)return null;
+ const baseline=samples.filter(s=>s.date<start).at(-1)||current[0];
+ return current[current.length-1].value-baseline.value;
+}
 export function targetResults(name:string,reports:SavedReport[],period:number){
  const periodReports=reports.filter(r=>inPeriod(r.date,period));
  return periodTargets.filter(t=>t.name===name).map(t=>{
  const sourceName=(t.title==='Jumlah ide kreatif team (campaign)'&&name==='Cindy')||(t.title==='Total pertumbuhan followers'&&name==='Mario')?'Dewi':name;
  const entries=periodReports.flatMap(r=>r.members.filter(m=>m.name===sourceName).map(m=>({...m,date:r.date}))).sort((a,b)=>b.date.localeCompare(a.date));
- // Each metric is a cumulative result for the selected 28-day reporting period.
- if(['Total pertumbuhan followers','Total penambahan likes TikTok','Total lead yang dihasilkan'].includes(t.title)){
+ if(['Total pertumbuhan followers','Total penambahan likes TikTok'].includes(t.title)){
+ const actual=metricGrowth(sourceName,reports,period);
+ return {...t,actual,score:actual===null?null:actual/t.target*100};
+ }
+ // Leads remain a cumulative result for the selected period.
+ if(t.title==='Total lead yang dihasilkan'){
  const latest=entries.find(m=>m.metric!==''&&m.metric!==undefined&&Number.isFinite(Number(m.metric)));
  const actual=latest?Number(latest.metric):null;
  return {...t,actual,score:actual===null?null:actual/t.target*100};

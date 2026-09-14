@@ -18,7 +18,7 @@ assert.equal(results.find(t=>t.title==='Total naskah konten Instagram grafis').a
 assert.equal(targetResults('Cindy',[report],1)[0].actual,0);
 assert.equal(targetResults('Mario',[],0)[0].score,null);
 console.log('PASS: 80% example, zero target, category mapping, done only, month isolation, missing metric');
-const metrics=[{date:'2026-09-16',members:[{name:'Dewi',metric:'100',tasks:[]},{name:'Mario',metric:'1000',tasks:[]},{name:'Ilham',metric:'10',tasks:[]}]},{date:'2026-09-20',members:[{name:'Dewi',metric:'1600',tasks:[]},{name:'Mario',metric:'80000',tasks:[]},{name:'Ilham',metric:'160',tasks:[]}]}];
+const metrics=[{date:'2026-09-16',members:[{name:'Dewi',metric:'2001',tasks:[]},{name:'Mario',metric:'100000',tasks:[]},{name:'Ilham',metric:'10',tasks:[]}]},{date:'2026-09-20',members:[{name:'Dewi',metric:'3601',tasks:[]},{name:'Mario',metric:'180000',tasks:[]},{name:'Ilham',metric:'160',tasks:[]}]}];
 assert.equal(targetResults('Dewi',metrics,0)[0].actual,1600);
 assert.equal(targetResults('Dewi',metrics,0)[0].score,80);
 assert.equal(targetResults('Mario',metrics,0)[0].actual,1600);
@@ -83,3 +83,17 @@ assert.equal(targetResults('Amar',[wednesday,nextPeriod],0)[0].actual,1);
 assert.equal(targetResults('Amar',[wednesday,complete,nextPeriod],0)[0].actual,0);
 assert.equal(taskHistory([wednesday,unchanged,complete]).length,1);
 console.log('PASS: carry-forward 50%, skipped dates, historical edits, completion once, period boundaries and immutable snapshots');
+
+const totals=(date,followers,likes=followers)=>({date,members:[{name:'Dewi',metric:String(followers),tasks:[]},{name:'Mario',metric:String(likes),tasks:[]}]});
+const growth=records=>targetResults('Dewi',records,0)[0].actual;
+assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22',2101)]),100);
+assert.equal(growth([totals('2026-09-21',2001)]),0);
+assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-15',2101)]),100);
+assert.equal(growth([totals('2026-09-14',2001)]),null);
+assert.equal(growth([totals('2026-09-14',2001),totals('2026-09-17',2101),totals('2026-10-12',2301),totals('2026-10-13',2501)]),300);
+assert.equal(targetResults('Dewi',[totals('2026-10-12',2301),totals('2026-10-13',2501)],1)[0].actual,200);
+assert.equal(growth([totals('2026-09-22',2001),totals('2026-09-21',2101)]),-100);
+assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22',2001)]),0);
+assert.equal(growth([totals('2026-09-21',2001),totals('2026-09-22','')]),0);
+assert.equal(targetResults('Mario',[totals('2026-09-21',2001,500000),totals('2026-09-22',2101,510000)],0)[1].actual,10000);
+console.log('PASS: account total deltas, first baseline, period rollover, missing days, unchanged and falling totals, TikTok likes');
