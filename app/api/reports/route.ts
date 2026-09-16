@@ -1,4 +1,4 @@
-import {editActivity} from '../../editActivity';
+import {editActivity,editMetric} from '../../editActivity';
 import type {SavedReport} from '../../reportData';
 import {validateReport} from '../../reportData';
 export const runtime='nodejs';
@@ -11,7 +11,7 @@ export async function POST(request:Request){
  try{
  const raw=await request.text();if(raw.length>45000)return json({error:'Report terlalu panjang. Kurangi isi report.'},413);
  const body=JSON.parse(raw);
- if(!['list','save','category','edit'].includes(body.action))return json({error:'Permintaan tidak valid.'},400);
+ if(!['list','save','category','edit','editMetric'].includes(body.action))return json({error:'Permintaan tidak valid.'},400);
  if(body.action==='save'){
    try{if(!['sosmed','marketing'].includes(body.report.division))throw Error();const error=validateReport(body.report);if(error)return json({error},400);}catch{return json({error:'Format report tidak valid.'},400);}
  }
@@ -22,12 +22,12 @@ export async function POST(request:Request){
  return await response.json() as {ok:boolean;error?:string;currentId?:string;code?:number;reports?:SavedReport[];report?:SavedReport};
  }
  let payload=body;
- if(body.action==='edit'){
+ if(body.action==='edit'||body.action==='editMetric'){
  const snapshot=await google({action:'list'});if(!snapshot.ok||!Array.isArray(snapshot.reports))throw Error();
  const current=snapshot.reports.find(r=>r.date===body.date&&r.division===body.division);
  if(!current||current.id!==body.expectedId)return json({error:'Report sudah berubah. Muat ulang dashboard, lalu edit kembali.',currentId:current?.id},409);
  let report:SavedReport;
- try{report=editActivity(current,body.member,body.taskId,body.patch,crypto.randomUUID());}catch(error){return json({error:(error as Error).message},400);}
+ try{report=body.action==='editMetric'?editMetric(current,body.member,body.metric,crypto.randomUUID()):editActivity(current,body.member,body.taskId,body.patch,crypto.randomUUID());}catch(error){return json({error:(error as Error).message},400);}
  payload={action:'save',report,expectedId:current.id};
  }
  const result=await google(payload);

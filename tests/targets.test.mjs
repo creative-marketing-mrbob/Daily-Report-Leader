@@ -113,3 +113,10 @@ assert.equal(periodGrowthAtDate('Dewi',dailyReports,'2026-09-19').baselineDate,'
 assert.equal(periodGrowthAtDate('Mario',dailyReports,'2026-09-17').actual,250);
 assert.equal(targetResults('Dewi',dailyReports,0)[0].actual,200);
 console.log('PASS: each report date shows cumulative growth from the period benchmark, including missing days and period reset');
+
+const corrected=[totals('2026-09-15',2051,501000),totals('2026-09-16',2101,510000),totals('2026-09-17',2251,520000)];
+assert.equal(periodGrowthAtDate('Dewi',corrected,'2026-09-16').actual,50);
+assert.equal(periodGrowthAtDate('Dewi',corrected,'2026-09-17').actual,200);
+assert.equal(targetResults('Dewi',corrected,0)[0].actual,200);
+assert.equal(targetResults('Mario',corrected,0)[1].actual,19000);
+console.log('PASS: corrected benchmark totals recalculate report progress and period targets');

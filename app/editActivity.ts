@@ -5,3 +5,9 @@ export function editActivity(report:SavedReport,memberName:string,taskId:string,
  if(!member?.tasks.some(t=>t.id===taskId))throw new Error('Aktivitas tidak ditemukan. Muat ulang dashboard.');
  return {...report,id,members:report.members.map(m=>m.name!==memberName?m:{...m,tasks:m.tasks.map(t=>t.id!==taskId?t:{...t,pekerjaan:patch.pekerjaan.trim(),kategori:patch.kategori.trim(),progress:String(Number(patch.progress))})})};
 }
+
+export function editMetric(report:SavedReport,memberName:string,metric:unknown,id:string):SavedReport{
+ if(!['Dewi','Mario'].includes(memberName)||!report.members.some(m=>m.name===memberName))throw new Error('Data anggota tidak ditemukan.');
+ if(typeof metric!=='string'||!/^\d+$/.test(metric)||!Number.isSafeInteger(Number(metric)))throw new Error('Isi total dengan angka bulat, minimal 0.');
+ return {...report,id,members:report.members.map(m=>m.name===memberName?{...m,metric:String(Number(metric))}:m)};
+}
