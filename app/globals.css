@@ -37,3 +37,5 @@
 .daily-growth{display:inline-block;margin-left:16px;color:#496181;font-weight:500;font-size:12px}@media(max-width:600px){.daily-growth{display:block;margin:5px 0 0}}
 
 .metric-report-row{background:#fafcff}.metric-report-content{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.metric-report-content>span{color:#647b9b}.metric-report-content input{width:180px}.metric-report-content .activity-edit-actions{margin-top:0}
+
+.dashboard-problems{margin-top:28px}.dashboard-problems>h2{margin-bottom:16px}.dashboard-problems .card-title h3{margin:0}
